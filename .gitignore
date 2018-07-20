@@ -1,4 +1,4 @@
 
-outdir/.*
-.*.wav
-__pycache__/.*
+outdir/
+*.wav
+__pycache__/
