@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from tensorboardX import SummaryWriter
 from plotting_utils import plot_alignment_to_numpy, plot_spectrogram_to_numpy
 from plotting_utils import plot_gate_outputs_to_numpy
-
+from synthesis import synthesis_griffin_lim
 
 class Tacotron2Logger(SummaryWriter):
     def __init__(self, logdir):
@@ -16,7 +16,7 @@ class Tacotron2Logger(SummaryWriter):
             self.add_scalar("learning.rate", learning_rate, iteration)
             self.add_scalar("duration", duration, iteration)
 
-    def log_validation(self, reduced_loss, model, y, y_pred, iteration):
+    def log_validation(self, reduced_loss, model, y, y_pred, iteration, hparams):
         self.add_scalar("validation.loss", reduced_loss, iteration)
         _, mel_outputs, gate_outputs, alignments = y_pred
         mel_targets, gate_targets = y
@@ -45,4 +45,17 @@ class Tacotron2Logger(SummaryWriter):
             plot_gate_outputs_to_numpy(
                 gate_targets[idx].data.cpu().numpy(),
                 F.sigmoid(gate_outputs[idx]).data.cpu().numpy()),
-            iteration)
+            iteration)       
+        self.add_audio(
+            "audio_from_target",
+            synthesis_griffin_lim(mel_targets[idx].unsqueeze(0),hparams),
+            iteration,
+            hparams.sampling_rate
+        )
+        self.add_audio(
+            "audio_from_predicted",
+            synthesis_griffin_lim(mel_outputs[idx].unsqueeze(0),hparams),
+            iteration,
+            hparams.sampling_rate
+        )
+        

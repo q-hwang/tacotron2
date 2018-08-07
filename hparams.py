@@ -9,7 +9,7 @@ def create_hparams(hparams_string=None, verbose=False):
         ################################
         # Experiment Parameters        #
         ################################
-        epochs=500,
+        epochs=10000,
         iters_per_checkpoint=500,
         seed=1234,
         dynamic_loss_scaling=True,
@@ -24,16 +24,16 @@ def create_hparams(hparams_string=None, verbose=False):
         # Data Parameters             #
         ################################
         load_mel_from_disk=False,
-        training_files='filelists/ljs_audio_text_train_filelist.txt',
-        validation_files='filelists/ljs_audio_text_val_filelist.txt',
-        text_cleaners=['english_cleaners'],
+        training_files='/datasets/THCHS30/D8/train_files_pinyin.txt',
+        validation_files='/datasets/THCHS30/D8/eval_files_pinyin.txt',
+        text_cleaners=['basic_cleaners'],
         sort_by_length=False,
 
         ################################
         # Audio Parameters             #
         ################################
         max_wav_value=32768.0,
-        sampling_rate=22050,
+        sampling_rate=16000,
         filter_length=1024,
         hop_length=256,
         win_length=1024,
@@ -56,7 +56,7 @@ def create_hparams(hparams_string=None, verbose=False):
         n_frames_per_step=1,  # currently only 1 is supported
         decoder_rnn_dim=1024,
         prenet_dim=256,
-        max_decoder_steps=1000,
+        max_decoder_steps=2500,
         gate_threshold=0.6,
 
         # Attention parameters
@@ -79,7 +79,7 @@ def create_hparams(hparams_string=None, verbose=False):
         learning_rate=1e-3,
         weight_decay=1e-6,
         grad_clip_thresh=1,
-        batch_size=40,
+        batch_size=20,
         mask_padding=False  # set model's padded outputs to padded values
     )
 
