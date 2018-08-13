@@ -24,8 +24,8 @@ def create_hparams(hparams_string=None, verbose=False):
         # Data Parameters             #
         ################################
         load_mel_from_disk=False,
-        training_files='/datasets/THCHS30/D8/train_files_pinyin.txt',
-        validation_files='/datasets/THCHS30/D8/eval_files_pinyin.txt',
+        training_files='/datasets/AVOCADO/small_data/guoguo/train.txt',
+        validation_files='/datasets/AVOCADO/small_data/guoguo/eval.txt',
         text_cleaners=['basic_cleaners'],
         sort_by_length=False,
 
@@ -77,7 +77,7 @@ def create_hparams(hparams_string=None, verbose=False):
         ################################
         use_saved_learning_rate=False,
         learning_rate=1e-3,
-        weight_decay=1e-6,
+        weight_decay=1e-4,
         grad_clip_thresh=1,
         batch_size=20,
         mask_padding=False  # set model's padded outputs to padded values
