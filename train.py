@@ -58,7 +58,7 @@ def prepare_dataloaders(hparams):
     train_sampler = DistributedSampler(trainset) \
         if hparams.distributed_run else None
 
-    train_loader = DataLoader(trainset, num_workers=1, shuffle=False,
+    train_loader = DataLoader(trainset, num_workers=4, shuffle=False,
                               sampler=train_sampler,
                               batch_size=hparams.batch_size, pin_memory=False,
                               drop_last=True, collate_fn=collate_fn)
@@ -167,11 +167,12 @@ def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
 
     torch.manual_seed(hparams.seed)
     torch.cuda.manual_seed(hparams.seed)
-
+    print("at least")
     model = load_model(hparams)
     learning_rate = hparams.learning_rate
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate,
                                  weight_decay=hparams.weight_decay)
+    print("???")
     if hparams.fp16_run:
         optimizer = FP16_Optimizer(
             optimizer, dynamic_loss_scale=hparams.dynamic_loss_scaling)
@@ -180,9 +181,9 @@ def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
 
     logger = prepare_directories_and_logger(
         output_directory, log_directory, rank)
-
+    print("here")
     train_loader, valset, collate_fn = prepare_dataloaders(hparams)
-
+    print("ok")
     # Load checkpoint if one exists
     iteration = 0
     epoch_offset = 0

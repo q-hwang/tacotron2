@@ -24,8 +24,8 @@ def create_hparams(hparams_string=None, verbose=False):
         # Data Parameters             #
         ################################
         load_mel_from_disk=False,
-        training_files='/datasets/AVOCADO/small_data/guoguo/train.txt',
-        validation_files='/datasets/AVOCADO/small_data/guoguo/eval.txt',
+        training_files='/home/guandao/data/avaocado_data20181222_all/guoguo/train.txt',
+        validation_files='/home/guandao/data/avaocado_data20181222_all/guoguo/eval.txt',
         text_cleaners=['basic_cleaners'],
         sort_by_length=False,
 
@@ -79,7 +79,7 @@ def create_hparams(hparams_string=None, verbose=False):
         learning_rate=1e-3,
         weight_decay=1e-4,
         grad_clip_thresh=1,
-        batch_size=20,
+        batch_size=50,
         mask_padding=False  # set model's padded outputs to padded values
     )
 
