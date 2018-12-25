@@ -28,6 +28,7 @@ class TextMelLoader(torch.utils.data.Dataset):
         random.seed(1234)
         if shuffle:
             random.shuffle(self.audiopaths_and_text)
+        self.all_pairs = [self.get_mel_text_pair(self.audiopaths_and_text[index]) for index in range(self.__len__())]
 
     def get_mel_text_pair(self, audiopath_and_text):
         # separate filename and text
@@ -57,7 +58,8 @@ class TextMelLoader(torch.utils.data.Dataset):
         return text_norm
 
     def __getitem__(self, index):
-        return self.get_mel_text_pair(self.audiopaths_and_text[index])
+#         return self.get_mel_text_pair(self.audiopaths_and_text[index])
+        return self.all_pairs[index]
 
     def __len__(self):
         return len(self.audiopaths_and_text)
