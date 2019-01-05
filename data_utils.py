@@ -6,6 +6,7 @@ import torch.utils.data
 import layers
 from utils import load_wav_to_torch, load_filepaths_and_text
 from text import text_to_sequence
+import tqdm
 
 
 class TextMelLoader(torch.utils.data.Dataset):
@@ -28,7 +29,7 @@ class TextMelLoader(torch.utils.data.Dataset):
         random.seed(1234)
         if shuffle:
             random.shuffle(self.audiopaths_and_text)
-        self.all_pairs = [self.get_mel_text_pair(self.audiopaths_and_text[index]) for index in range(self.__len__())]
+        self.all_pairs = [self.get_mel_text_pair(self.audiopaths_and_text[index]) for index in tqdm.trange(self.__len__())]
 
     def get_mel_text_pair(self, audiopath_and_text):
         # separate filename and text
