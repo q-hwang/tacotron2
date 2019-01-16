@@ -94,9 +94,10 @@ class Prenet(nn.Module):
             [LinearNorm(in_size, out_size, bias=False)
              for (in_size, out_size) in zip(in_sizes, sizes)])
 
-    def forward(self, x):
+    def forward(self, x, drop_prob=0.5):
         for linear in self.layers:
-            x = F.dropout(F.relu(linear(x)), p=0.5, training=True)
+            x = F.dropout(F.relu(linear(x)), p=0.25, training=True)
+#             x = F.dropout(F.relu(linear(x)), p=drop_prob, training=True)
         return x
 
 
@@ -194,7 +195,8 @@ class Encoder(nn.Module):
 
     def inference(self, x):
         for conv in self.convolutions:
-            x = self.dropout(F.relu(conv(x)))
+#             x = self.dropout(F.relu(conv(x)))
+            x = F.relu(conv(x))
 
         x = x.transpose(1, 2)
 
@@ -338,7 +340,7 @@ class Decoder(nn.Module):
 
         return mel_outputs, gate_outputs, alignments
 
-    def decode(self, decoder_input):
+    def decode(self, decoder_input, drop_prob=0.5):
         """ Decoder step using stored states, attention and memory
         PARAMS
         ------
@@ -363,7 +365,7 @@ class Decoder(nn.Module):
             attention_weights_cat, self.mask)
 
         self.attention_weights_cum += self.attention_weights
-        prenet_output = self.prenet(decoder_input)
+        prenet_output = self.prenet(decoder_input, drop_prob=drop_prob)
         decoder_input = torch.cat((prenet_output, self.attention_context), -1)
         self.decoder_hidden, self.decoder_cell = self.decoder_rnn(
             decoder_input, (self.decoder_hidden, self.decoder_cell))
@@ -412,7 +414,7 @@ class Decoder(nn.Module):
 
         return mel_outputs, gate_outputs, alignments
 
-    def inference(self, memory):
+    def inference(self, memory, drop_prob=0.5):
         """ Decoder inference
         PARAMS
         ------
@@ -430,7 +432,7 @@ class Decoder(nn.Module):
 
         mel_outputs, gate_outputs, alignments = [], [], []
         while True:
-            mel_output, gate_output, alignment = self.decode(decoder_input)
+            mel_output, gate_output, alignment = self.decode(decoder_input, drop_prob=drop_prob)
 
             mel_outputs += [mel_output]
             gate_outputs += [gate_output.squeeze(1)]
@@ -524,12 +526,12 @@ class Tacotron2(nn.Module):
             [mel_outputs, mel_outputs_postnet, gate_outputs, alignments],
             output_lengths)
 
-    def inference(self, inputs):
+    def inference(self, inputs, drop_prob=0.5):
         inputs = self.parse_input(inputs)
         embedded_inputs = self.embedding(inputs).transpose(1, 2)
         encoder_outputs = self.encoder.inference(embedded_inputs)
         mel_outputs, gate_outputs, alignments = self.decoder.inference(
-            encoder_outputs)
+            encoder_outputs, drop_prob=drop_prob)
 
         mel_outputs_postnet = self.postnet(mel_outputs)
         mel_outputs_postnet = mel_outputs + mel_outputs_postnet

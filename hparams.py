@@ -24,8 +24,8 @@ def create_hparams(hparams_string=None, verbose=False):
         # Data Parameters             #
         ################################
         load_mel_from_disk=False,
-        training_files='/home/guandao/data/avaocado_data20181222_all/guoguo22050_fix/train.txt',
-        validation_files='/home/guandao/data/avaocado_data20181222_all/guoguo22050_fix/eval.txt',
+        training_files='/home/guandao/data/avaocado_data20181222_all/guoguo22050_jan13_16000/train.txt',
+        validation_files='/home/guandao/data/avaocado_data20181222_all/guoguo22050_jan13_16000/eval.txt',
         text_cleaners=['basic_cleaners'],
         sort_by_length=False,
 
@@ -33,7 +33,7 @@ def create_hparams(hparams_string=None, verbose=False):
         # Audio Parameters             #
         ################################
         max_wav_value=32768.0,
-        sampling_rate=22050,
+        sampling_rate=16000,
         filter_length=1024,
         hop_length=256,
         win_length=1024,

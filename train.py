@@ -58,7 +58,7 @@ def prepare_dataloaders(hparams):
     train_sampler = DistributedSampler(trainset) \
         if hparams.distributed_run else None
 
-    train_loader = DataLoader(trainset, num_workers=4, shuffle=False,
+    train_loader = DataLoader(trainset, num_workers=0, shuffle=True,
                               sampler=train_sampler,
                               batch_size=hparams.batch_size, pin_memory=False,
                               drop_last=True, collate_fn=collate_fn)
@@ -167,7 +167,10 @@ def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
 
     torch.manual_seed(hparams.seed)
     torch.cuda.manual_seed(hparams.seed)
+    print("Loading models...")
     model = load_model(hparams)
+
+    print("Initializing optimizer...")
     learning_rate = hparams.learning_rate
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate,
                                  weight_decay=hparams.weight_decay)
@@ -177,9 +180,14 @@ def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
 
     criterion = Tacotron2Loss()
 
+    print("Initializing logger...")
     logger = prepare_directories_and_logger(
         output_directory, log_directory, rank)
+
+    print("Initializing dataloader...")
     train_loader, valset, collate_fn = prepare_dataloaders(hparams)
+
+    print("Loading checkpoints...")
     # Load checkpoint if one exists
     iteration = 0
     epoch_offset = 0
@@ -243,12 +251,13 @@ def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
                 if rank == 0:
                     print("Validation loss {}: {:9f}  ".format(
                         iteration, reduced_val_loss))
-                    logger.log_validation(
-                        reduced_val_loss, model, y, y_pred, iteration,hparams)
+
                     checkpoint_path = os.path.join(
                         output_directory, "checkpoint_{}".format(iteration))
                     save_checkpoint(model, optimizer, learning_rate, iteration,
                                     checkpoint_path)
+                    logger.log_validation(
+                        reduced_val_loss, model, x, y, y_pred, iteration,hparams)
 
             iteration += 1
 

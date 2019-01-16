@@ -7,7 +7,9 @@ The default is a set of ASCII characters that works well for English or text tha
 from text import cmudict
 
 _pad        = '_'
-_eos        = '~'
+# _eos        = '~'
+_eos        = '#'
+# _characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890！？，。：‘’“”!\'(),-.:;? '
 _characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890！？，。：‘’“”!\'(),-.:;?…、~·%《—》ω '
 
 # Prepend "@" to ARPAbet symbols to ensure uniqueness (some are the same as uppercase letters):
