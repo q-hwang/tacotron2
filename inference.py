@@ -26,7 +26,7 @@ from synthesis import synthesis_griffin_lim
 from chinese_process import get_pinyin
 
 
-def load_model(checkpoint_path):
+def get_model(checkpoint_path):
     #### Setup hparams
     hparams = create_hparams("distributed_run=False,mask_padding=False")
     hparams.filter_length = 1024
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     #### Load model from checkpoint
     checkpoint_path = sys.argv[1]
     # checkpoint_path = "/home/guandao/Projects/tacotron2/jan13_p=0.25/checkpoint_114000"
-    model = load_model(checkpoint_path)
+    model = get_model(checkpoint_path)
 
     #### Prepare text input
     sequence = get_input(get_pinyin(sys.argv[2]))
