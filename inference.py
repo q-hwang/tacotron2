@@ -34,7 +34,13 @@ def get_model(hparams, checkpoint_path):
         model = model.module
     except:
         pass
-    model.load_state_dict({k.replace('module.',''):v for k,v in torch.load(checkpoint_path)['state_dict'].items()})
+    
+    if torch.cuda.is_available():
+        checkpoint = torch.load(checkpoint_path)
+    else:
+        checkpoint = torch.load(checkpoint_path, map_location=lambda storage, loc: storage)
+       
+    model.load_state_dict({k.replace('module.',''):v for k,v in checkpoint['state_dict'].items()})
     # model.cpu()
     print("evaluating...")
     _ = model.eval()
@@ -44,7 +50,7 @@ def get_model(hparams, checkpoint_path):
 def get_input(text):
     sequence = np.array(text_to_sequence(text, ['basic_cleaners']))[None, :]
     sequence = torch.autograd.Variable(
-      torch.from_numpy(sequence)).cuda().long()
+      torch.from_numpy(sequence)).to(torch.device("cuda" if torch.cuda.is_available() else "cpu")).long()
     return sequence
 
 
