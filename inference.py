@@ -11,6 +11,7 @@
 import sys, os
 import numpy as np
 import torch
+from scipy.io.wavfile import write
 import librosa.core.time_frequency as t
 
 from data_utils import TextMelLoader
@@ -26,13 +27,8 @@ from synthesis import synthesis_griffin_lim
 from chinese_process import get_pinyin
 
 
-def get_model(checkpoint_path):
-    #### Setup hparams
-    hparams = create_hparams("distributed_run=False,mask_padding=False")
-    hparams.filter_length = 1024
-    hparams.hop_length = 256
-    hparams.win_length = 1024
-
+def get_model(hparams, checkpoint_path):
+    
     model = load_model(hparams)
     try:
         model = model.module
@@ -77,15 +73,35 @@ def to_wavenet_mel(mel_np):
 
 
 def main(text, checkpoint_path, path, name):
+    #### Setup hparams
+    hparams = create_hparams("distributed_run=False,mask_padding=False")
+    hparams.filter_length = 1024
+    hparams.hop_length = 256
+    hparams.win_length = 1024
+
+    
     #### Load model from checkpoint
-    model = get_model(checkpoint_path)
+    model = get_model(hparams,checkpoint_path)
 
     #### Prepare text input
     sequence = get_input(get_pinyin(text))
 
     #### inference
     mel_outputs, mel_outputs_postnet, _, alignments = model.inference(sequence, drop_prob=0.25)
-
+   
+    #### tacotron result
+    taco_stft = TacotronSTFT(
+    hparams.filter_length, hparams.hop_length, hparams.win_length, 
+    sampling_rate=hparams.sampling_rate)
+    mel_decompress = taco_stft.spectral_de_normalize(mel_outputs_postnet)
+    mel_decompress = mel_decompress.transpose(1, 2).data.cpu()
+    spec_from_mel_scaling = 1000
+    spec_from_mel = torch.mm(mel_decompress[0], taco_stft.mel_basis)
+    spec_from_mel = spec_from_mel.transpose(0, 1).unsqueeze(0)
+    spec_from_mel = spec_from_mel * spec_from_mel_scaling
+    waveform = griffin_lim(torch.autograd.Variable(spec_from_mel[:, :, :-1]), 
+                       taco_stft.stft_fn, 60)
+    write(os.path.join(path, name) + '_tacotron.wav', 16000, waveform[0].data.cpu().numpy())
 
     #### transform tacotron mel to wavenet mel
     wavenet_mel = to_wavenet_mel(mel_outputs_postnet.data.cpu().numpy()[0].T)
