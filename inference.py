@@ -3,7 +3,7 @@
 
 '''
 
-    python inference [checkpoint_path] [text] [outdir] [name]
+    python inference [text] [checkpoint_path] [outdir] [name]
 
 '''
 
@@ -65,7 +65,7 @@ def _amp_to_db(x):
     return 20 * np.log10(np.maximum(min_level, x))
 
 
-def to_wavenet_mel(tacotron_mel):
+def to_wavenet_mel(mel_np):
     axis = np.linspace(t.hz_to_mel(75), t.hz_to_mel(7600),80)
     trimed = np.zeros(mel_np.shape)
     for i in range(mel_np.shape[0]):
@@ -76,15 +76,12 @@ def to_wavenet_mel(tacotron_mel):
     return wavenet_mel
 
 
-if __name__ == '__main__':
-
+def main(text, checkpoint_path, path, name):
     #### Load model from checkpoint
-    checkpoint_path = sys.argv[1]
-    # checkpoint_path = "/home/guandao/Projects/tacotron2/jan13_p=0.25/checkpoint_114000"
     model = get_model(checkpoint_path)
 
     #### Prepare text input
-    sequence = get_input(get_pinyin(sys.argv[2]))
+    sequence = get_input(get_pinyin(text))
 
     #### inference
     mel_outputs, mel_outputs_postnet, _, alignments = model.inference(sequence, drop_prob=0.25)
@@ -96,10 +93,13 @@ if __name__ == '__main__':
 
 
     #### save
-    path = sys.argv[3]
-    name = sys.argv[4]
     np.save(os.path.join(path, name) + '_mel.npy',mel_outputs_postnet.data.cpu().numpy()[0])
     np.save(os.path.join(path, name) + '_alig.npy',alignments.data.cpu().numpy()[0])
     np.save(os.path.join(path, name) + '.npy',wavenet_mel)
 
 
+if __name__ == '__main__':
+    
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+
+    
